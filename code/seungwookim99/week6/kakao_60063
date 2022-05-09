@@ -1,0 +1,65 @@
+from collections import deque
+
+def out_of_range(y,x,N):
+    return y < 0 or y >= N or x < 0 or x >= N
+
+def move_or_rotate(y1,x1,y2,x2,board,N):
+    dy = [0,1,0,-1]
+    dx = [1,0,-1,0]
+    res = []
+    for i in range(4):
+        ny1 = y1 + dy[i]
+        nx1 = x1 + dx[i]
+        ny2 = y2 + dy[i]
+        nx2 = x2 + dx[i]
+        if not out_of_range(ny1,nx1,N) and not out_of_range(ny2,nx2,N):
+            if board[ny1][nx1] == 0 and board[ny2][nx2] == 0:
+                res.append(((ny1,nx1),(ny2,nx2)))
+    
+    # 가로 -> 세로로 회전
+    if y1 == y2:
+        # 위로 회전
+        if not out_of_range(y1-1,x1,N):
+            if board[y1-1][x1] == 0 and board[y2-1][x2] == 0:
+                res.append(((y1,x1),(y1-1,x1)))
+                res.append(((y2,x2),(y2-1,x2)))
+        # 아래로 회전
+        if not out_of_range(y1+1,x1,N):
+            if board[y1+1][x1] == 0 and board[y2+1][x2] == 0:
+                res.append(((y1,x1),(y1+1,x1)))
+                res.append(((y2,x2),(y2+1,x2)))
+    else: # 세로 -> 가로로 회전
+        # 왼쪽으로 회전
+        if not out_of_range(y1,x1-1,N):
+            if board[y1][x1-1] == 0 and board[y2][x2-1] == 0:
+                res.append(((y1,x1),(y1,x1-1)))
+                res.append(((y2,x2),(y2,x2-1)))
+        # 오른쪽으로 회전
+        if not out_of_range(y1,x1+1,N):
+            if board[y1][x1+1] == 0 and board[y2][x2+1] == 0:
+                res.append(((y1,x1),(y1,x1+1)))
+                res.append(((y2,x2),(y2,x2+1)))
+    return res
+
+def solution(board):
+    INF = int(1e10)
+    N = len(board)
+    answer = INF
+    visited = []
+    visited.append({(0,0),(0,1)})
+    q = deque()
+    q.append([{(0,0),(0,1)},0])
+
+    while q:
+        robot, count = q.popleft()
+        robot = list(robot)
+        y1, x1, y2, x2 = robot[0][0], robot[0][1], robot[1][0], robot[1][1]
+        for n1,n2 in move_or_rotate(y1,x1,y2,x2,board,N):
+            ny1,nx1 = n1[0], n1[1]
+            ny2,nx2 = n2[0], n2[1]
+            if not {(ny1,nx1),(ny2,nx2)} in visited:
+                q.append([{(ny1,nx1),(ny2,nx2)},count+1])
+                visited.append({(ny1,nx1),(ny2,nx2)})
+                if (ny1 == N-1 and nx1 == N-1) or (ny2 == N-1 and nx2 == N-1):
+                    answer = min(answer, count+1)
+    return answer

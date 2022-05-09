@@ -1,0 +1,32 @@
+from bisect import bisect_left, bisect_right
+
+def count_by_range(L, start, end):
+    return bisect_right(L, end) - bisect_left(L, start)
+
+def solution(words, queries):
+    answer = []
+    words_dict = {}
+    words_dict_rev = {}
+    for i in range(100001):
+        words_dict[i] = [] 
+        words_dict_rev[i] = []
+    for word in words:
+        words_dict[len(word)].append(word)
+        words_dict_rev[len(word)].append(word[::-1])
+        
+    # 정렬
+    for w in words_dict.values():
+        w.sort()
+    for w in words_dict_rev.values():
+        w.sort()
+    
+    # 이진탐색
+    for query in queries:
+        if query[0] == '?':
+            L = words_dict_rev[len(query)]
+            start, end = query[::-1].replace('?', 'a'), query[::-1].replace('?', 'z')
+        else:
+            L = words_dict[len(query)]
+            start, end = query.replace('?', 'a'), query.replace('?', 'z')
+        answer.append(count_by_range(L, start, end))    
+    return answer
